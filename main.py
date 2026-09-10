@@ -41,7 +41,7 @@ except Exception as e:
 st.sidebar.header("📌 도감 목차")
 st.sidebar.markdown("- **1구역**: 개별 영화의 날짜별 일관객 변화")
 st.sidebar.markdown("- **2구역**: 일관객 합계 Top 5 영화의 추이 비교")
-st.sidebar.markdown("- **3구역**: (추가 예정)")
+st.sidebar.markdown("- **3구역**: 날짜별 Top 10 관객 합계 추이")
 
 st.divider()
 
@@ -133,7 +133,76 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문�
 st.divider()
 
 # ==========================================
-# 구역 3: [추가 그래프 예정 구역]
+# 구역 3: 날짜별 10위권 일관객 합계 영역 그래프
 # ==========================================
-st.header("3️⃣ [추가 예정] 시간 흐름에 따른 관객 분석")
+st.header("3️⃣ 날짜별 10위권 일관객 총합 추이")
+st.caption("매일 박스오피스 Top 10 영화들의 일관객 합계를 계산하여 영역 그래프(Area Chart)로 표시합니다. 일관객 합계가 가장 컸던 상위 3일이 강조되어 표시됩니다.")
+
+# 날짜별 10위권 일관객 합계 데이터 집계
+daily_sum = df.groupby('날짜')['일관객'].sum().reset_index().sort_values('날짜')
+
+# 영역 그래프 생성
+fig3 = px.area(
+    daily_sum,
+    x='날짜',
+    y='일관객',
+    title="날짜별 BoxOffice Top 10 일관객 총합 추이",
+    markers=False
+)
+
+fig3.update_traces(
+    hovertemplate="<b>날짜:</b> %{x|%Y-%m-%d}<br><b>10위권 총 관객수:</b> %{y:,}명<extra></extra>",
+    fillcolor="rgba(31, 119, 180, 0.3)",
+    line=dict(color="#1f77b4", width=2)
+)
+
+# Top 3 관객수 많은 날 추출
+top3_days = daily_sum.nlargest(3, '일관객').sort_values('일관객', ascending=False)
+
+# 그래프 상에 Top 3 주석(Annotation) 및 마커 추가
+rank_labels = ["🥇 1위", "🥈 2위", "🥉 3위"]
+for idx, (_, row) in enumerate(top3_days.iterrows()):
+    date_str = row['날짜'].strftime('%Y-%m-%d')
+    audience_cnt = int(row['일관객'])
+    
+    # 강조 포인트 마커 표기
+    fig3.add_scatter(
+        x=[row['날짜']],
+        y=[audience_cnt],
+        mode='markers+text',
+        marker=dict(size=10, color='red', symbol='circle'),
+        showlegend=False,
+        hoverinfo='skip'
+    )
+    
+    # 주석 텍스트 추가 (순위, 날짜, 관객 수)
+    fig3.add_annotation(
+        x=row['날짜'],
+        y=audience_cnt,
+        text=f"<b>{rank_labels[idx]} ({date_str})</b><br>{audience_cnt:,}명",
+        showarrow=True,
+        arrowhead=2,
+        arrowsize=1,
+        arrowwidth=1.5,
+        arrowcolor="red",
+        ax=0,
+        ay=-45 - (idx * 10),
+        bordercolor="red",
+        borderwidth=1,
+        borderpad=4,
+        bgcolor="white",
+        opacity=0.9
+    )
+
+fig3.update_layout(
+    xaxis_title="날짜",
+    yaxis_title="Top 10 관객 합계 (명)",
+    hovermode="x unified",
+    template="plotly_white"
+)
+
+# Streamlit에 그래프 출력
+st.plotly_chart(fig3, use_container_width=True)
+
+# 사용자 작성용 '이 그래프로 알 수 있는 것' 빈 문구 자리
 st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
