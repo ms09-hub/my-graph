@@ -85,8 +85,8 @@ if selected_movie:
     # Streamlit에 그래프 출력
     st.plotly_chart(fig1, use_container_width=True)
     
-    # 사용자 작성용 '이 그래프로 알 수 있는 것' 빈 문구 자리
-    st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
+    # '이 그래프로 알 수 있는 것' 문구 반영
+    st.info("💡 **이 그래프로 알 수 있는 것:** 점이 찍혀진 곳은 순위 10위 안에 든 것이다.")
 
 st.divider()
 
@@ -129,8 +129,8 @@ fig2.update_layout(
 # Streamlit에 그래프 출력
 st.plotly_chart(fig2, use_container_width=True)
 
-# 사용자 작성용 '이 그래프로 알 수 있는 것' 빈 문구 자리
-st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
+# '이 그래프로 알 수 있는 것' 문구 반영
+st.info("💡 **이 그래프로 알 수 있는 것:** 날짜 개봉이 비슷한 영화끼리 비교한다.")
 
 st.divider()
 
@@ -206,8 +206,8 @@ fig3.update_layout(
 # Streamlit에 그래프 출력
 st.plotly_chart(fig3, use_container_width=True)
 
-# 사용자 작성용 '이 그래프로 알 수 있는 것' 빈 문구 자리
-st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
+# '이 그래프로 알 수 있는 것' 문구 반영
+st.info("💡 **이 그래프로 알 수 있는 것:** 강조된 부분은 보통 주말이다.")
 
 st.divider()
 
@@ -226,7 +226,7 @@ top10_movies_df = (
     )
     .reset_index()
     .nlargest(10, '총관객수')
-    .sort_values('총관객수', ascending=True)  # Plotly 가로 막대에서는 오름차순 정렬해야 1위가 상단에 위치
+    .sort_values('총관객수', ascending=True)  # Plotly 가로 막대에서는 오름차순 정렬해야 위쪽에 1위가 배치됨
 )
 
 # Plotly 가로 막대그래프 생성
@@ -255,8 +255,8 @@ fig4.update_layout(
 # Streamlit에 그래프 출력
 st.plotly_chart(fig4, use_container_width=True)
 
-# 사용자 작성용 '이 그래프로 알 수 있는 것' 빈 문구 자리
-st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
+# '이 그래프로 알 수 있는 것' 문구 반영
+st.info("💡 **이 그래프로 알 수 있는 것:** 총 관객 수가 많은 영화는 가로 막대가 길게 표시된다.")
 
 st.divider()
 
