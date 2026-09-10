@@ -42,6 +42,8 @@ st.sidebar.header("📌 도감 목차")
 st.sidebar.markdown("- **1구역**: 개별 영화의 날짜별 일관객 변화")
 st.sidebar.markdown("- **2구역**: 일관객 합계 Top 5 영화의 추이 비교")
 st.sidebar.markdown("- **3구역**: 날짜별 Top 10 관객 합계 추이")
+st.sidebar.markdown("- **4구역**: 총 관객수 Top 10 영화 가로 막대 그래프")
+st.sidebar.markdown("- **5구역**: (추가 예정)")
 
 st.divider()
 
@@ -175,7 +177,7 @@ for idx, (_, row) in enumerate(top3_days.iterrows()):
         hoverinfo='skip'
     )
     
-    # 주석 텍스트 추가 (순위, 날짜, 관객 수)
+    # 주석 텍스트 추가
     fig3.add_annotation(
         x=row['날짜'],
         y=audience_cnt,
@@ -205,4 +207,61 @@ fig3.update_layout(
 st.plotly_chart(fig3, use_container_width=True)
 
 # 사용자 작성용 '이 그래프로 알 수 있는 것' 빈 문구 자리
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
+
+st.divider()
+
+# ==========================================
+# 구역 4: 기간 내 총 관객수 TOP 10 영화 가로 막대그래프
+# ==========================================
+st.header("4️⃣ 기간 내 총 관객수 Top 10 영화")
+st.caption("해당 기간 동안의 일관객을 모두 더해 상위 10개 영화를 가로 막대그래프로 보여줍니다. 마우스를 올리면 10위권 진입 날수도 함께 확인할 수 있습니다.")
+
+# 영화별 총 관객수 및 10위권 진입 날수(데이터 등장 횟수) 집계
+top10_movies_df = (
+    df.groupby('영화명')
+    .agg(
+        총관객수=('일관객', 'sum'),
+        진입일수=('날짜', 'nunique')
+    )
+    .reset_index()
+    .nlargest(10, '총관객수')
+    .sort_values('총관객수', ascending=True)  # Plotly 가로 막대에서는 오름차순 정렬해야 1위가 상단에 위치
+)
+
+# Plotly 가로 막대그래프 생성
+fig4 = px.bar(
+    top10_movies_df,
+    x='총관객수',
+    y='영화명',
+    orientation='h',
+    title="기간 내 총 관객수 Top 10 영화 (가로 막대그래프)",
+    text_auto=',d',
+    custom_data=['진입일수']
+)
+
+# 툴팁(마우스 오버) 서식 설정
+fig4.update_traces(
+    hovertemplate="<b>영화명:</b> %{y}<br><b>총 관객수:</b> %{x:,}명<br><b>10위권 진입 날수:</b> %{customdata[0]}일<extra></extra>",
+    marker_color='#1f77b4'
+)
+
+fig4.update_layout(
+    xaxis_title="총 관객 수 (명)",
+    yaxis_title="영화명",
+    template="plotly_white"
+)
+
+# Streamlit에 그래프 출력
+st.plotly_chart(fig4, use_container_width=True)
+
+# 사용자 작성용 '이 그래프로 알 수 있는 것' 빈 문구 자리
+st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
+
+st.divider()
+
+# ==========================================
+# 구역 5: [추가 그래프 예정 구역]
+# ==========================================
+st.header("5️⃣ [추가 예정] 시간 흐름에 따른 관객 분석")
 st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
