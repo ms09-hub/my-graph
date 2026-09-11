@@ -43,7 +43,7 @@ st.sidebar.markdown("- **1구역**: 개별 영화의 날짜별 일관객 변화"
 st.sidebar.markdown("- **2구역**: 일관객 합계 Top 5 영화의 추이 비교")
 st.sidebar.markdown("- **3구역**: 날짜별 Top 10 관객 합계 추이")
 st.sidebar.markdown("- **4구역**: 총 관객수 Top 10 영화 가로 막대 그래프")
-st.sidebar.markdown("- **5구역**: (추가 예정)")
+st.sidebar.markdown("- **5구역**: 월×요일별 일관객 합계 히트맵")
 
 st.divider()
 
@@ -261,7 +261,58 @@ st.info("💡 **이 그래프로 알 수 있는 것:** 총 관객 수가 많은 
 st.divider()
 
 # ==========================================
-# 구역 5: [추가 그래프 예정 구역]
+# 구역 5: 월×요일별 일관객 합계 히트맵
 # ==========================================
-st.header("5️⃣ [추가 예정] 시간 흐름에 따른 관객 분석")
+st.header("5️⃣ 월×요일별 일관객 합계 히트맵")
+st.caption("월과 요일을 기준으로 일관객 합계를 계산하여 히트맵으로 시각화합니다. 관객이 많을수록 색상이 진해집니다.")
+
+# 데이터 복사본 생성 및 월, 요일 컬럼 추출
+df_heatmap = df.copy()
+df_heatmap['월'] = df_heatmap['날짜'].dt.month.astype(str) + "월"
+df_heatmap['요일'] = df_heatmap['날짜'].dt.day_name()
+
+# 요일 한글 변환 매핑
+day_map = {
+    'Monday': '월요일', 'Tuesday': '화요일', 'Wednesday': '수요일',
+    'Thursday': '목요일', 'Friday': '금요일', 'Saturday': '토요일', 'Sunday': '일요일'
+}
+df_heatmap['요일'] = df_heatmap['요일'].map(day_map)
+
+# 월/요일 순서 정렬을 위한 Categorical 설정
+months_order = [f"{i}월" for i in range(1, 13)]
+days_order = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+
+# 월×요일별 일관객 합계 피벗 계산
+heatmap_data = (
+    df_heatmap.groupby(['월', '요일'])['일관객']
+    .sum()
+    .reset_index()
+)
+
+# 히트맵 생성 (density_heatmap)
+fig5 = px.density_heatmap(
+    heatmap_data,
+    x='요일',
+    y='월',
+    z='일관객',
+    title="월×요일별 일관객 합계 히트맵",
+    color_continuous_scale="Blues",  # 색상이 진할수록 많은 관객수
+    category_orders={'요일': days_order, '월': months_order}
+)
+
+fig5.update_traces(
+    hovertemplate="<b>월:</b> %{y}<br><b>요일:</b> %{x}<br><b>관객 합계:</b> %{z:,}명<extra></extra>"
+)
+
+fig5.update_layout(
+    xaxis_title="요일",
+    yaxis_title="월",
+    coloraxis_colorbar=dict(title="관객 수 (명)"),
+    template="plotly_white"
+)
+
+# Streamlit에 그래프 출력
+st.plotly_chart(fig5, use_container_width=True)
+
+# 사용자 작성용 '이 그래프로 알 수 있는 것' 빈 문구 자리
 st.info("💡 **이 그래프로 알 수 있는 것:** (여기에 작성할 문구를 입력하세요)")
